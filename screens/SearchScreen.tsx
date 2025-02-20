@@ -11,8 +11,10 @@ import {
   Modal,
   Pressable,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useTheme } from "../context/ThemeContext"; // Adjust this import
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SearchScreen: React.FC = () => {
   const { theme } = useTheme(); // Retrieve the theme from context
@@ -47,6 +49,27 @@ const SearchScreen: React.FC = () => {
       setLoading(false); // Hide loading indicator
     }
   };
+
+  const saveToFavorites = async (meal: any) => {
+    try {
+      const existingFavorites = await AsyncStorage.getItem("favorites");
+      const favorites = existingFavorites ? JSON.parse(existingFavorites) : [];
+
+
+      // Avoid duplicates
+      if (!favorites.some((fav: any) => fav.idMeal === meal.idMeal)) {
+        favorites.push(meal);
+        await AsyncStorage.setItem("favorites", JSON.stringify(favorites));
+        console.log("DEBUG: Saved Recipe ->", meal); // ✅ Check what's being saved
+        Alert.alert("Saved!", "Recipe added to favorites.");
+      } else {
+        Alert.alert("Already Saved", "This recipe is already in your favorites.");
+      }
+    } catch (error) {
+      console.error("Error saving to favorites:", error);
+    }
+  };
+
 
   // Use effect to handle searching as the user types
   useEffect(() => {
@@ -139,6 +162,10 @@ const SearchScreen: React.FC = () => {
                     {selectedMeal.strInstructions}
                   </Text>
                 </ScrollView>
+
+                <TouchableOpacity style={styles.saveButton} onPress={() => saveToFavorites(selectedMeal)}>
+                  <Text style={styles.saveButtonText}>Save to Favorites ❤️</Text>
+                </TouchableOpacity>
 
                 <Pressable style={styles.closeButton} onPress={closeModal}>
                   <Text style={styles.closeButtonText}>Close</Text>
@@ -299,6 +326,17 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   closeButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  
+  saveButton: {
+    backgroundColor: "#ff5733",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  saveButtonText: {
     color: "#fff",
     fontWeight: "bold",
   },

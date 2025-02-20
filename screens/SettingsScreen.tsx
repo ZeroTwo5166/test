@@ -1,9 +1,19 @@
 import React from "react";
-import { View, Text, StyleSheet, Switch } from "react-native";
+import { View, Text, StyleSheet, Switch, Button, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../context/ThemeContext"; // Adjust this import based on your file structure
 
 const SettingsScreen: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
+
+  const resetFavorites = async () => {
+    try {
+      await AsyncStorage.removeItem("favorites");
+      Alert.alert("Success", "All favorite recipes have been removed.");
+    } catch (error) {
+      Alert.alert("Error", "Failed to reset favorite recipes.");
+    }
+  };
 
   return (
     <View style={[styles.container, theme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
@@ -11,12 +21,9 @@ const SettingsScreen: React.FC = () => {
         Settings ⚙️
       </Text>
       <Text style={[styles.subtitle, theme === 'dark' ? styles.darkSubtitle : styles.lightSubtitle]}>
-      Customize your app experience here.
+        Customize your app experience here.
       </Text>
-      <View style={[
-        styles.themeToggle,
-        { backgroundColor: theme === 'dark' ? '#333' : '#fff' } // Apply background color conditionally
-      ]}>
+      <View style={styles.themeToggle}>
         <Text style={[styles.toggleLabel, theme === 'dark' ? styles.darkLabel : styles.lightLabel]}>
           {theme === 'dark' ? 'Dark Theme' : 'Light Theme'}
         </Text>
@@ -27,6 +34,7 @@ const SettingsScreen: React.FC = () => {
           thumbColor={theme === 'dark' ? '#fff' : '#f4f3f4'}
         />
       </View>
+      <Button title="Reset Favorites" onPress={resetFavorites} color="#ff4d4d" />
     </View>
   );
 };
@@ -37,36 +45,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
-    paddingVertical: 40, // Additional vertical padding for better spacing
   },
   darkContainer: {
-    backgroundColor: "#222", // Dark background
+    backgroundColor: "#222",
   },
   lightContainer: {
-    backgroundColor: "#f5f5f5", // Light background for a softer look
+    backgroundColor: "#f5f5f5",
   },
   title: {
-    fontSize: 28, // Slightly larger font size
+    fontSize: 28,
     fontWeight: "bold",
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 16,
     marginBottom: 20,
-    textAlign: "center", // Center align the subtitle for better readability
-    paddingHorizontal: 20, // Add padding for readability
+    textAlign: "center",
   },
   themeToggle: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 20,
-    padding: 10,
-    borderRadius: 10,
-    elevation: 3, // Adds shadow on Android
-    shadowColor: '#000', // Shadow color for iOS
-    shadowOffset: { width: 0, height: 1 }, // Shadow offset
-    shadowOpacity: 0.2, // Shadow opacity
-    shadowRadius: 1, // Shadow blur radius
+    marginBottom: 20,
   },
   toggleLabel: {
     fontSize: 18,
@@ -79,10 +78,10 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   darkSubtitle: {
-    color: "#ccc", // Softer color for dark theme
+    color: "#ccc",
   },
   lightSubtitle: {
-    color: "#555", // Softer color for light theme
+    color: "#555",
   },
   darkLabel: {
     color: "#fff",
